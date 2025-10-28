@@ -1,0 +1,30 @@
+# Build artifacts
+build/bin/
+build/obj/
+*.o
+*.a
+*.so
+*.elf
+*.bin
+*.hex
+
+# Generated code
+build/gen/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Compiler output
+*.log
+*.out
+
+# Dependencies
+*.d

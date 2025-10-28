@@ -1,0 +1,58 @@
+robot SimpleBot {
+  motor left on M1
+  motor right on M2
+  sensor dist on UART0 type Distance
+  gpio estop on GPIO5 mode InputPullup
+
+  net mqtt broker "mqtts://edge.local:8883" client_id "simplebot-01"
+  topic telem_pub "bots/simple/telemetry"
+  topic cmd_sub   "bots/simple/cmd"
+
+  limits {
+    speed max 60%
+    turn_rate max 90deg/s
+  }
+
+  task move(speed: Percent, t: ms) {
+    left.power = speed
+    right.power = speed
+    wait(t)
+    stop()
+  }
+
+  task avoid() {
+    if dist.value < 25cm {
+      stop()
+      turn(30deg, clockwise)
+    }
+  }
+
+  task publish_telem() {
+    let payload = json {
+      "ts": now(),
+      "dist_cm": dist.value
+    }
+    net.publish(telem_pub, payload, qos:1)
+  }
+
+  on message cmd_sub as msg {
+    if msg.type == "move" {
+      move(msg.speed%, msg.t_ms)
+    }
+    if msg.type == "estop" {
+      estop()
+    }
+  }
+
+  schedule control @ 500Hz priority HIGH {
+    avoid()
+  }
+
+  schedule telem @ 1Hz priority LOW {
+    publish_telem()
+  }
+
+  when estop reads LOW {
+    estop()
+  }
+}

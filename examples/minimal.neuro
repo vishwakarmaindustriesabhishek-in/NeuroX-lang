@@ -1,0 +1,14 @@
+robot MinimalBot {
+  motor m1 on M1
+  
+  task blink() {
+    m1.power = 50%
+    wait(1000ms)
+    m1.power = 0%
+    wait(1000ms)
+  }
+  
+  schedule main @ 1Hz priority HIGH {
+    blink()
+  }
+}
